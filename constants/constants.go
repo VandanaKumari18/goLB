@@ -10,3 +10,10 @@ type Backend struct {
 	Weight        int `json:"weight"`
 	WeightedScore float64
 }
+
+var (
+	RoundRobbin         = "RoundRobbin"
+	LeastConnections    = "LeastConnections"
+	LeastTime           = "LeastTime"
+	WeightedRoundRobbin = "WeightedRoundRobbin"
+)
