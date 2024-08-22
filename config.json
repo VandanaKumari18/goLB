@@ -2,19 +2,19 @@
 
     "servers": [
       {
-        "url": "http://172.16.0.1:8081",
+        "url": "http://172.16.0.1:8091",
         "weight": 2
       },
       {
-        "url": "http://172.16.0.1:8082",
+        "url": "http://172.16.0.1:8092",
         "weight": 2
       },
       {
-        "url": "http://172.16.0.1:8083",
+        "url": "http://172.16.0.1:8093",
         "weight": 2
       }
     ],
     "algorithm": "WeightedRoundRobin",
-    "proxy": "http://localhost:8080"
+    "proxy": "http://localhost:8090"
 
   }
