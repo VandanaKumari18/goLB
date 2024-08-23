@@ -34,6 +34,17 @@ var (
 	WeightedRoundRobbin = "WeightedRoundRobbin"
 )
 
+// util methods
+
+func (b *Backend) IncrementConnections() {
+	b.Connections++
+	fmt.Println("Connections increment", b.Connections)
+}
+func (b *Backend) DecrementConnections() {
+	fmt.Println("Connections decrement", b.Connections)
+	b.Connections--
+}
+
 func ReadConfig(filename string) (*Config, error) {
 	jsonFile, err := os.Open("config.json")
 
