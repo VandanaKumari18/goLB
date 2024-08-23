@@ -5,12 +5,16 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
+	"sync"
+	"time"
 
 	backend "goLB/constants"
 )
 
 var backends []*backend.Backend // Slice of backend servers
+var mutex sync.Mutex
 
 func main() {
 
@@ -59,5 +63,33 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	// implement
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	backend := backends[0]
+
+	if backend == nil {
+		fmt.Println("No healthy backend servers available")
+		http.Error(w, "No healthy backend servers available", http.StatusServiceUnavailable)
+		return
+	}
+
+	fmt.Println("Selected backend server:", backend.URL)
+	url, _ := url.Parse(backend.URL)
+
+	// Forward request to selected backend server
+	startTime := time.Now()
+	proxy := httputil.NewSingleHostReverseProxy(url)
+
+	proxy.Transport = &http.Transport{
+		IdleConnTimeout:     90 * time.Second,
+		MaxIdleConns:        100, // connection alive until 100s
+		MaxIdleConnsPerHost: 100,
+		TLSHandshakeTimeout: 10 * time.Second,
+	}
+	proxy.ServeHTTP(w, r)
+
+	backend.ResponseTime = time.Since(startTime)
+	fmt.Println("Response time", backend.ResponseTime)
+
 }
