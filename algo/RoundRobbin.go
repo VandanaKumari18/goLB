@@ -1,8 +1,10 @@
 package algorithms
 
-import "goLB/constants"
+import (
+	backend "goLB/utility"
+)
 
-func RoundRobbin(index int, backends []*constants.Backend) int {
+func RoundRobbin(index int, backends []*backend.Backend) int {
 	// fmt.Println(backends[0].ResponseTime)
 	return (index + 1) % len(backends)
 
