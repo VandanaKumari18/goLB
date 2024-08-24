@@ -10,11 +10,20 @@ import (
 	"sync"
 	"time"
 
+	algorithms "goLB/algo"
 	backend "goLB/constants"
 )
 
-var backends []*backend.Backend // Slice of backend servers
-var mutex sync.Mutex
+var (
+	backends []*backend.Backend // Slice of backend servers
+	mutex    sync.Mutex
+)
+
+var (
+	algos           = backend.WeightedRoundRobbin
+	nextServerIndex = 0
+	CurrentWeight   = 0
+)
 
 func main() {
 
@@ -66,7 +75,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	backend := backends[0]
+	backend := selectHealthyBackend()
 
 	if backend == nil {
 		fmt.Println("No healthy backend servers available")
@@ -76,6 +85,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Selected backend server:", backend.URL)
 	url, _ := url.Parse(backend.URL)
+
+	// Increment the number of connections for the selected backend server
+	backend.IncrementConnections()
 
 	// Forward request to selected backend server
 	startTime := time.Now()
@@ -91,5 +103,43 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	backend.ResponseTime = time.Since(startTime)
 	fmt.Println("Response time", backend.ResponseTime)
+
+	// Decrement the number of connections for the selected backend server
+	defer backend.DecrementConnections()
+}
+
+func selectHealthyBackend() *backend.Backend {
+	// Filter out unhealthy backends
+	healthyBackends := make([]*backend.Backend, 0)
+	for i := range backends {
+		if backends[i].Healthy {
+			healthyBackends = append(healthyBackends, backends[i])
+		}
+	}
+
+	if len(healthyBackends) == 0 {
+		return nil
+	}
+
+	switch algos {
+	case backend.RoundRobbin:
+		nextServerIndex = algorithms.RoundRobbin(nextServerIndex, healthyBackends)
+		return healthyBackends[nextServerIndex]
+	case backend.LeastConnections:
+		nextServerIndex = algorithms.LeastConnections(healthyBackends)
+		return healthyBackends[nextServerIndex]
+	case backend.WeightedRoundRobbin:
+		// fmt.Println("CurrentWeight is the", CurrentWeight)
+		nextServerIndex, CurrentWeight = algorithms.WeightedRoundRobbin(CurrentWeight, healthyBackends)
+		return healthyBackends[nextServerIndex]
+	case backend.LeastTime:
+		nextServerIndex = algorithms.LeastTime(healthyBackends)
+		return healthyBackends[nextServerIndex]
+
+	default:
+		nextServerIndex = algorithms.RoundRobbin(nextServerIndex, healthyBackends)
+		return healthyBackends[nextServerIndex]
+
+	}
 
 }
