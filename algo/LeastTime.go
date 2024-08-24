@@ -1,10 +1,10 @@
 package algorithms
 
 import (
-	constants "goLB/constants"
+	backend "goLB/utility"
 )
 
-func LeastTime(backends []*constants.Backend) int {
+func LeastTime(backends []*backend.Backend) int {
 	var min int
 	min = int(backends[0].ResponseTime)
 	index := 0

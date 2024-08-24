@@ -1,10 +1,10 @@
 package algorithms
 
 import (
-	"goLB/constants"
+	backend "goLB/utility"
 )
 
-func LeastConnections(backends []*constants.Backend) int {
+func LeastConnections(backends []*backend.Backend) int {
 	var min int
 	min = int(backends[0].Connections)
 	index := 0

@@ -1,11 +1,11 @@
 package healthcheck
 
 import (
-	"goLB/constants"
+	backend "goLB/utility"
 	"net/http"
 )
 
-func CheckHealth(backend *constants.Backend) bool {
+func CheckHealth(backend *backend.Backend) bool {
 	// Send a health check request to the backend server
 	resp, err := http.Get(backend.URL)
 	if err != nil || resp.StatusCode != http.StatusOK {

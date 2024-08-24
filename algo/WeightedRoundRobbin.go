@@ -2,11 +2,10 @@ package algorithms
 
 import (
 	"fmt"
-
-	"goLB/constants"
+	backend "goLB/utility"
 )
 
-func WeightedRoundRobbin(current int, backends []*constants.Backend) (int, int) {
+func WeightedRoundRobbin(current int, backends []*backend.Backend) (int, int) {
 	// fmt.Println("WeightedRoundRobbin")
 	totalWeight := 0
 	for _, backend := range backends {
