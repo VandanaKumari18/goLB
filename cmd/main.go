@@ -11,8 +11,8 @@ import (
 	"time"
 
 	algorithms "goLB/algo"
-	backend "goLB/constants"
 	"goLB/healthcheck"
+	backend "goLB/utility"
 )
 
 var (
