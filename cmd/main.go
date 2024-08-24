@@ -12,6 +12,7 @@ import (
 
 	algorithms "goLB/algo"
 	backend "goLB/constants"
+	"goLB/healthcheck"
 )
 
 var (
@@ -141,5 +142,26 @@ func selectHealthyBackend() *backend.Backend {
 		return healthyBackends[nextServerIndex]
 
 	}
+}
 
+func healthCheck() {
+	for {
+		time.Sleep(10 * time.Second) // Check health every 10 seconds
+
+		// Perform health check for each backend server
+		for i := range backends {
+			if !healthcheck.CheckHealth(backends[i]) {
+				backends[i].Healthy = false
+				fmt.Printf("Backend %s is unhealthy %d \n", backends[i].URL, backends[i].Connections)
+			} else {
+				backends[i].Healthy = true
+				fmt.Printf("Backend %s is healthy %d \n", backends[i].URL, backends[i].Connections)
+			}
+		}
+	}
+}
+
+func init() {
+	// Start health check in the background
+	go healthCheck()
 }
